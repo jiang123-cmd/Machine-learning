@@ -160,7 +160,7 @@ class Adaboost():
             self.m+=1
             self.frequency+=1
             #print("基本分类器数量：",self.frequency)
-            if (self.frequency>=100):#最多20个基本分类器
+            if (self.frequency>=100):#最多100个基本分类器
                 break
         return self.apha,self.Threshol,self.distinguish_sum,self.result_finally
             
@@ -170,13 +170,32 @@ Threshol=[]
 distinguish_sum=[]
 result=[]
 apha,Threshol,distinguish_sum,result=adaboost.train(X_train,y_train)
-print("apha: ",apha)
-print("Threshol: ",Threshol)
-print("distinguish_sum: ",distinguish_sum)
-
+print("apha: ",apha)  #每个弱分类器的apha
+print("Threshol: ",Threshol)  #每个弱分类器的阈值
+print("distinguish_sum: ",distinguish_sum)  #每个弱分类器阈值左右的数
+#最好的结果有9个误分类的点
 
 print(np.array(result))
 for i in range(len(result)):
     y_train[i]=result[i]
     plt.scatter(X_train[y_train==1,0], X_train[y_train==1,1], marker='o', c='r', label='1') 
     plt.scatter(X_train[y_train==-1,0], X_train[y_train==-1,1], marker='o', c='b', label='-1') 
+    
+ 2
+比较支持向量机、 AdaBoost 、逻辑斯谛回归模型的学习策略与算法。
+支持向量机:
+学习策略:就是间隔最大化，可形式化为一个求解凸二次规划的问题，也等价于正则化的合页损失函数的最小化问题。
+算法：SMO算法：SMO算法是是一种启发式算法，其基本思路是：如果所有变量的解都满足此最优化问题的KKT条件，那么这个最优化问题的解就得到了。
+选择两个变量，固定其他变量，针对这两个变量构建一个二次规划问题。如此，SMO算法将原问题不断分解为子问题并对子问题求解，进而达到求解原问
+题的目的。
+
+Adaboost:
+学习策略：从弱学习算法出发，反复学习，得到一系列弱分类器（又叫基本分类器），然后组合这些弱分类器，构成一个强分类器。
+算法：对于如何改变训练数据的权值分布，adaboost提高那些被前一轮弱分类器错误分类样本的权值，而降低那些被正确分类样本的权值; 对于如何将弱
+分类器组合成一个强分类器，adaboost使用加权多数表决的方法，加大分类误差率小的弱分类器的权值，使其在表决中起更大的作用。减小分类误差率大
+的弱分类器的权值，使其在表决中起较小的作用。
+
+逻辑斯谛回归模型：
+学习策略：逻辑斯谛回归模型的学习策略是在给定的训练数据条件下对模型进行极大似然估计或正则化的极大似然估计，可以形式化为无约束最优化问题
+算法：改进的迭代尺度算法（IIS），梯度下降法，牛顿法以及拟牛顿法
+    
