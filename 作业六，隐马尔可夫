@@ -1,0 +1,72 @@
+import numpy as np
+class HMM(object):
+    def __init__(self,N,M):
+        self.A = np.array([[0.5,0.1,0.4],[0.3,0.5,0.2],[0.2,0.2,0.6]])      # 状态转移概率矩阵
+        self.B = np.array([[0.5,0.5],[0.4,0.6],[0.7,0.3]])      # 观测概率矩阵
+        self.Pi = np.array([[0.2],[0.3],[0.5]])   # 初始状态概率矩阵
+
+        self.N = N                      # 可能的状态数
+        self.M = M                      # 可能的观测数
+        
+    def cal_probality(self, O):
+        self.T = len(O)
+        self.O = O
+
+        self.forward()
+        return sum(self.alpha[self.T-1])
+
+    def forward(self):
+            """
+            前向算法
+            """
+            self.alpha = np.zeros((self.T,self.N))
+
+            # 公式 10.15
+            for i in range(self.N):
+                self.alpha[0][i] = self.Pi[i]*self.B[i][self.O[0]]
+
+            # 公式10.16
+            for t in range(1,self.T):
+                for i in range(self.N):
+                    sum = 0
+                    for j in range(self.N):
+                        sum += self.alpha[t-1][j]*self.A[j][i]
+                    self.alpha[t][i] = sum * self.B[i][self.O[t]]
+
+    def backward(self):
+        """
+        后向算法
+        """
+        self.beta = np.zeros((self.T,self.N))
+
+        # 公式10.19
+        for i in range(self.N):
+            self.beta[self.T-1][i] = 1
+
+        # 公式10.20
+        for t in range(self.T-2,-1,-1):
+            for i in range(self.N):
+                for j in range(self.N):
+                    self.beta[t][i] += self.A[i][j]*self.B[j][self.O[t+1]]*self.beta[t+1][j]
+
+    def cal_gamma(self, i, t):
+        """
+        公式 10.24
+        """
+        numerator = self.alpha[t][i]*self.beta[t][i]
+        denominator = 0
+
+        for j in range(self.N):
+            denominator += self.alpha[t][j]*self.beta[t][j]
+
+        return numerator/denominator
+
+hmm=HMM(3,2)
+O=np.array([0,1,0,0,1,0,1,1])
+hmm.cal_probality(O)
+hmm.backward()
+print(hmm.alpha)
+print(hmm.beta)
+P=hmm.cal_gamma(2,3)# 此处的t和i都是从0开始的，所以都比题给小1
+print(P)
+#最终结果为：0.5817260678261299
